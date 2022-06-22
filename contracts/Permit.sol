@@ -63,7 +63,7 @@ contract Permit is Ownable{
         bytes32 s
     ) public {
         // check if signature is expired
-        require(block.timestamp <= deadline, "ERR: expired deadline");
+        require(block.timestamp <= deadline, "ERR_SIGNATURE_EXPIRED");
 
         bytes32 hashStruct =
             keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, amount, _nonces[owner][erc20Address], deadline));
@@ -71,7 +71,7 @@ contract Permit is Ownable{
         bytes32 _hash = keccak256(abi.encodePacked(uint16(0x1901), domainsAllowed[erc20Address], hashStruct));
 
         address signer = ecrecover(_hash, v, r, s);
-        require(signer != address(0) && signer == owner, "ERR: Invalid signature");
+        require(signer != address(0) && signer == owner, "ERR_INVALID_SIGNATURE");
 
         _nonces[owner][erc20Address]++;
 
