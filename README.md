@@ -13,6 +13,14 @@ After the user gives max allowance to <code>address(this)</code> user can send a
 ```shell
 0x94957f401867c326d814135ec0f0F1Afda67c8c7
 ```
+
+## Requirements
+* node v0.16.+
+* npm v0.8.+
+* hardhat
+  
+  
+
 ## Setup project
 1. Clone the repository
    ```shell
