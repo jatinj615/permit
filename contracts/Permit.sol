@@ -5,6 +5,7 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+import "hardhat/console.sol";
 
 contract Permit is Ownable{
     using SafeERC20 for ERC20;
@@ -76,6 +77,7 @@ contract Permit is Ownable{
     ) public isDomainAllowed(erc20Address) {
         // check if signature is expired
         require(block.timestamp <= deadline, "ERR_SIGNATURE_EXPIRED");
+        
         bytes32 hashStruct =
             keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, amount, _nonces[owner][erc20Address], deadline));
         bytes32 _hash = keccak256(abi.encodePacked(uint16(0x1901), domainsAllowed[erc20Address], hashStruct));
