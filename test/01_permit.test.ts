@@ -18,9 +18,9 @@ describe("Deploys permit Contract and run tests", () =>{
     let tokenAddress:string;
     let impersonated_account:string;
     let underlyingERC20:ERC20;
-    let user: Signer;
-    let amount: BigNumber;
-    let deadline: BigNumber;
+    let user: Signer; // using for spender account
+    let amount: BigNumber; // amount to transfer
+    let deadline: BigNumber; // deadline for signature expiry
 
     before(async () => {
         const Permit:ContractFactory = await ethers.getContractFactory("Permit");
@@ -51,6 +51,7 @@ describe("Deploys permit Contract and run tests", () =>{
         
         // mine blocks to expire the signature
         await mineBlocks(300);
+
         const tx = permitContract.permit(
             tokenAddress, 
             await owner.getAddress(), 
