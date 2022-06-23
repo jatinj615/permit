@@ -67,9 +67,9 @@ const config: HardhatUserConfig = {
       tags: ["local"],
     },
     hardhat: {
-      accounts: {
-        mnemonic,
-      },
+      // accounts: {
+      //   mnemonic,
+      // },
       chainId: chainIds.hardhat,
       live: false,
       saveDeployments: true,

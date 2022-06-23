@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
@@ -17,6 +18,15 @@ contract Permit is Ownable{
     // Mapping from underlying ERC20 to domainHash
     mapping (address => bytes32) domainsAllowed;
 
+    // modifier to check if domain is allowed
+    modifier isDomainAllowed(address tokenAddress) {
+        require(domainsAllowed[tokenAddress] != bytes32(0x00), "ERR_DOMAIN_NOT_ALLOWED");
+        _;
+    }
+
+    // event for new domain allowed
+    event DomainAllowed(address erc20Address);
+
     /**
      * @dev function to add domainHash for underlying ERC20
      * @param erc20Address : address of underlyin ERC20 token
@@ -26,8 +36,8 @@ contract Permit is Ownable{
         assembly {
             chainID := chainid()
         }
-        string memory name = ERC20(erc20Address).name();
 
+        string memory name = ERC20(erc20Address).name();
         bytes32 domainSeparator = keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
@@ -38,13 +48,15 @@ contract Permit is Ownable{
             )
         );
         domainsAllowed[erc20Address] = domainSeparator;
+        emit DomainAllowed(erc20Address);
     }
 
     /**
      * @dev check the owner signed message and transfer underlying
      *      token from owner to spender.
      * Requirements :
-     * - owner must give max allowance to this Permit contract
+     * - owner must give max allowance to this Permit contract before 
+     *   calling permit.
      * @param erc20Address : address of underlying ERC20
      * @param owner: address of owner
      * @param spender: address of spender
@@ -61,13 +73,11 @@ contract Permit is Ownable{
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public {
+    ) public isDomainAllowed(erc20Address) {
         // check if signature is expired
         require(block.timestamp <= deadline, "ERR_SIGNATURE_EXPIRED");
-
         bytes32 hashStruct =
             keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, amount, _nonces[owner][erc20Address], deadline));
-
         bytes32 _hash = keccak256(abi.encodePacked(uint16(0x1901), domainsAllowed[erc20Address], hashStruct));
 
         address signer = ecrecover(_hash, v, r, s);

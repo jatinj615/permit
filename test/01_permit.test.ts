@@ -1,11 +1,15 @@
-import { assert } from "chai";
+import { assert, expect } from "chai";
 import { ethers } from "hardhat";
 import { bufferToHex, keccakFromString, ecsign, toBuffer } from "ethereumjs-util";
 import { Contract, Signer, ContractFactory } from 'ethers';
 import * as readline from "readline-sync";
-import { distributeUnderlying } from './utils/util';
+import { distributeUnderlying, assertRevert } from './utils/util';
+import { getPermitHash } from "./utils/permitUtils";
 import { ERC20__factory } from "../typechain/factories/@openzeppelin/contracts/token/ERC20/ERC20__factory";
 import { ERC20 } from '../typechain/@openzeppelin/contracts/token/ERC20/ERC20';
+
+// private key of hardhat account. Should never use private key in Prod.
+const OWNER_PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; 
 
 describe("Deploys permit Contract and run tests", () =>{
     let permitContract:Contract;
@@ -27,11 +31,67 @@ describe("Deploys permit Contract and run tests", () =>{
         underlyingERC20 = ERC20Factory.attach(tokenAddress);
     });
 
-    it("should try to permit without max approval to permit contract", async() =>{
+    it("should revert on permit with not allowed domain", async() =>{
         const user1 = accounts[1];
         const amount = ethers.utils.parseEther("100");
         const nonce = await permitContract.nonces(tokenAddress, user1.getAddress());
         const deadline = ethers.BigNumber.from("99999999999999"); // random timestamp in future
+        const hash = await getPermitHash(underlyingERC20, owner, user1, amount, nonce, deadline, permitContract.address);
+        const sig = ecsign(toBuffer(hash), toBuffer(OWNER_PRIVATE_KEY));
         
+        let result = permitContract.permit(
+            tokenAddress, 
+            await owner.getAddress(), 
+            await user1.getAddress(), 
+            amount,
+            deadline,
+            sig.v,
+            sig.r,
+            sig.s);
+        await expect(result).to.revertedWith("ERR_DOMAIN_NOT_ALLOWED");
+    });
+
+    it("should revert on adding domain separator for underlying with non owner", async () => {
+        const nonOwner = accounts[2];
+        const tx = permitContract.connect(nonOwner).allowDomain(tokenAddress);
+        await expect(tx).to.revertedWith("Ownable: caller is not the owner")
+    });
+
+    it("should successfully add domain separator with owner", async() => {
+        await permitContract.connect(owner).allowDomain(tokenAddress);
+    });
+
+    it("should revert on expired signature", async() => {
+        const user1 = accounts[1];
+        const amount = ethers.utils.parseEther("100");
+        const nonce = await permitContract.nonces(tokenAddress, user1.getAddress());
+        const deadline = ethers.BigNumber.from(Date.now().toString()); // current timestamp
+        const hash = await getPermitHash(underlyingERC20, owner, user1, amount, nonce, deadline, permitContract.address);
+        const sig = ecsign(toBuffer(hash), toBuffer(OWNER_PRIVATE_KEY));
+        
+    });
+
+    it("should revert on try to permit without max allowance", async () => {
+        const user1 = accounts[1];
+        const amount = ethers.utils.parseEther("100");
+        const nonce = await permitContract.nonces(tokenAddress, user1.getAddress());
+        const deadline = ethers.BigNumber.from("99999999999999"); // random timestamp in future
+        const hash = await getPermitHash(underlyingERC20, owner, user1, amount, nonce, deadline, permitContract.address);
+        const sig = ecsign(toBuffer(hash), toBuffer(OWNER_PRIVATE_KEY));
+        
+        let result = permitContract.permit(
+            tokenAddress, 
+            await owner.getAddress(), 
+            await user1.getAddress(), 
+            amount,
+            deadline,
+            sig.v,
+            sig.r,
+            sig.s);
+        await assertRevert(result);
+    });
+
+    it("should give max allowance and perform permit transfer of underlying", async() => {
+
     });
 })
