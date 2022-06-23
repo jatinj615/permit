@@ -3,6 +3,7 @@ import { HardhatUserConfig } from 'hardhat/config';
 import "hardhat-gas-reporter";
 import "hardhat-deploy";
 import "@typechain/hardhat";
+import "@nomiclabs/hardhat-etherscan";
 import { resolve } from "path";
 import { config as dotenvConfig } from "dotenv";
 import { NetworkUserConfig } from "hardhat/types";
@@ -114,6 +115,9 @@ const config: HardhatUserConfig = {
     outDir: "typechain",
     target: "ethers-v5",
   },
+  etherscan: {
+    apiKey: "V5J7NIFIAWBVF81J6XFRRCR4ZH3SIC4DIW"
+  }
 };
 
 
