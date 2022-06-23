@@ -1,5 +1,7 @@
 import { bufferToHex, keccak256, keccakFromString, toBuffer } from "ethereumjs-util";
+import { BigNumber, Signer } from "ethers";
 import { ethers } from "hardhat";
+import { ERC20 } from '../../typechain/@openzeppelin/contracts/token/ERC20/ERC20';
 const PERMIT_TYPEHASH = bufferToHex(
   keccakFromString("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
 );
@@ -23,7 +25,7 @@ function getDomainSeparator(name:string, tokenAddress:string) {
   );
 }
 
-exports.getPermitHash = async function getPermitHash(token, owner, spender, value, nonce, deadline) {
+exports.getPermitHash = async function getPermitHash(token:ERC20, owner:Signer, spender:Signer, value:BigNumber, nonce:BigNumber, deadline:BigNumber) {
   const name = await token.name();
 
   const DOMAIN_SEPARATOR = getDomainSeparator(name, token.address);
@@ -36,7 +38,7 @@ exports.getPermitHash = async function getPermitHash(token, owner, spender, valu
         toBuffer(
           ethers.utils.defaultAbiCoder.encode(
             ["bytes32", "address", "address", "uint256", "uint256", "uint256"],
-            [PERMIT_TYPEHASH, owner.address, spender.address, value, nonce.toNumber(), deadline.toNumber()],
+            [PERMIT_TYPEHASH, owner.getAddress(), spender.getAddress(), value, nonce.toNumber(), deadline.toNumber()],
           ),
         ),
       ),

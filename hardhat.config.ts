@@ -74,6 +74,9 @@ const config: HardhatUserConfig = {
       live: false,
       saveDeployments: true,
       tags: ["test", "local"],
+      forking: {
+        url: "https://eth-mainnet.alchemyapi.io/v2/" + alchemyApiKey
+      }
     },
     goerli: createTestnetConfig("goerli"),
     kovan: createTestnetConfig("kovan"),
