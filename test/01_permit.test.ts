@@ -7,10 +7,7 @@ import { distributeUnderlying, assertRevert, mineBlocks } from './utils/util';
 import { getPermitHash } from "./utils/permitUtils";
 import { ERC20__factory } from "../typechain/factories/@openzeppelin/contracts/token/ERC20/ERC20__factory";
 import { ERC20 } from '../typechain/@openzeppelin/contracts/token/ERC20/ERC20';
-
-// private key of hardhat account. Should never use private key in Prod.
-const OWNER_PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; 
-
+import { ownerPrivateKey } from "../hardhat.config";
 describe("Deploys permit Contract and run tests", () =>{
     let permitContract:Contract;
     let accounts:Signer[];
@@ -47,7 +44,7 @@ describe("Deploys permit Contract and run tests", () =>{
         const nonce = await permitContract.nonces(tokenAddress, await owner.getAddress());
         const currentTimestamp = Math.round(Date.now() / 1000) // current timestamp in seconds
         const hash = await getPermitHash(underlyingERC20, owner, user, amount, nonce, currentTimestamp, permitContract.address);
-        const sig = ecsign(toBuffer(hash), toBuffer(OWNER_PRIVATE_KEY));
+        const sig = ecsign(toBuffer(hash), toBuffer(ownerPrivateKey));
         
         // mine blocks to expire the signature
         await mineBlocks(300);
@@ -68,7 +65,7 @@ describe("Deploys permit Contract and run tests", () =>{
     it("should revert with wrong data in hash", async () => {
         const nonce = await permitContract.nonces(tokenAddress, await owner.getAddress());
         const hash = await getPermitHash(underlyingERC20, user, owner, amount, nonce, deadline.toNumber(), permitContract.address); // generating wrong hash
-        const sig = ecsign(toBuffer(hash), toBuffer(OWNER_PRIVATE_KEY));
+        const sig = ecsign(toBuffer(hash), toBuffer(ownerPrivateKey));
         
         let tx = permitContract.permit(
             tokenAddress, 
@@ -86,7 +83,7 @@ describe("Deploys permit Contract and run tests", () =>{
     it("should revert on try to permit without max allowance", async () => {
         const nonce = await permitContract.nonces(tokenAddress, await owner.getAddress());
         const hash = await getPermitHash(underlyingERC20, owner, user, amount, nonce, deadline.toNumber(), permitContract.address);
-        const sig = ecsign(toBuffer(hash), toBuffer(OWNER_PRIVATE_KEY));
+        const sig = ecsign(toBuffer(hash), toBuffer(ownerPrivateKey));
         
         let result = permitContract.permit(
             tokenAddress, 
@@ -108,7 +105,7 @@ describe("Deploys permit Contract and run tests", () =>{
         
         const nonce = await permitContract.nonces(tokenAddress, await owner.getAddress());
         const hash = await getPermitHash(underlyingERC20, owner, user, amount, nonce, deadline.toNumber(), permitContract.address);
-        const sig = ecsign(toBuffer(hash), toBuffer(OWNER_PRIVATE_KEY));
+        const sig = ecsign(toBuffer(hash), toBuffer(ownerPrivateKey));
 
         const balanceBefore = await underlyingERC20.balanceOf(await user.getAddress());
 
@@ -132,7 +129,7 @@ describe("Deploys permit Contract and run tests", () =>{
 
         const nonce = await permitContract.nonces(tokenAddress, await owner.getAddress());
         const hash = await getPermitHash(underlyingERC20, owner, user, amount, nonce, deadline.toNumber(), permitContract.address);
-        const sig = ecsign(toBuffer(hash), toBuffer(OWNER_PRIVATE_KEY));
+        const sig = ecsign(toBuffer(hash), toBuffer(ownerPrivateKey));
 
         // first transaction should succeed
         await permitContract.permit(

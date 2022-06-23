@@ -2,6 +2,8 @@ import { assert } from 'chai';
 import { BigNumber, Signer } from 'ethers';
 import { ethers, network } from "hardhat";
 import { ERC20__factory } from '../../typechain/factories/@openzeppelin/contracts/token/ERC20/ERC20__factory';
+import { config as dotenvConfig } from "dotenv";
+
 
 
 const assertRevert = async (

@@ -31,6 +31,12 @@ if (!process.env.MNEMONIC) {
 } else {
   mnemonic = process.env.MNEMONIC;
 }
+export let ownerPrivateKey: string;
+if(!process.env.OWNER_PRIVATE_KEY) {
+  throw new Error("Please set your OWNER_PRIVATE_KEY in a .env file");
+} else {
+  ownerPrivateKey = process.env.OWNER_PRIVATE_KEY;
+}
 
 let alchemyApiKey: string;
 if (!process.env.ALCHEMY_API_KEY) {

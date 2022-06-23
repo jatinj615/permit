@@ -26,19 +26,35 @@ After user give max allowance to <code>address(this)</code> user can send a sign
     // structure of env file
     ALCHEMY_API_KEY=<YOUR_ALCHEMY_KEY> // can use - GuY3V68erOgOioj6jYTGb1IfkJCIxhLH
     MNEMONIC=<YOUR_MNEMONIC_PRIVATE_KEY>
-    ONWER_PRIVATE_KEY=<YOUR_OWNER_PRIVATE_KEY>
+    OWNER_PRIVATE_KEY=<YOUR_OWNER_PRIVATE_KEY>
    ```
 
    refer to <code>.env.example</code> file for refrence.</br>
 
+   To get <code>OWNER_PRIVATE_KEY</code> run 
+   ```shell
+   npx hardhat node
 
-
+   // Ouput
+   Account #0: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 (10000 ETH)
+   Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 //OWNER_PRIVATE_KEY(must be of Account #0)
+   ```
 3. Install the dependencies
    ```shell
    npm install
    ```
-4. Run test cases
+4. Compile the code
    ```shell
-   npx hardhat test
+   npx hardhat compile
    ```
+
+### Run Test cases
+```shell
+npx hardhat test
+```
+
+### Deploy Contract
+```shell
+npx hardhat run scripts/deployer.ts --network <network_name>
+```
 
