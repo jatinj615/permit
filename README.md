@@ -1,15 +1,36 @@
-# Basic Sample Hardhat Project
+# Permit wrapper for ERC20
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+## Problem Statement
+ERC2612 allows for gasless approvals for ERC20 via signatures. 
+While many ERC20 tokens now incorporate permits, many do not. 
+contract which serves as a wrapper to an ERC20 and allows permits.
 
-Try running some of the following tasks:
+## Proposed Solution
+Created a singleton contract which implements permit and relies on max allowance.<br>
+After user give max allowance to <code>address(this)</code> user can send a signature with <code>permit</code> method which will check the signature and transfer the tokens using <code>safeTransferFrom</code> method from <code>SafeERC20</code>.
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+## Setup project
+1. Clone the repository
+   ```shell
+   git clone https://github.com/jatinj615/permit.git
+   cd permit
+   ```
+2. create <code>.env</code> file and set environment variables 
+   ```shell
+    touch .env
+
+    // structure of env file
+    ALCHEMY_API_KEY=<YOUR_ALCHEMY_KEY> // can use - GuY3V68erOgOioj6jYTGb1IfkJCIxhLH
+    MNEMONIC=<YOUR_MNEMONIC_PRIVATE_KEY>
+
+   ```
+   refer to <code>.env.example</code> file for refrence.
+3. Install the dependencies
+   ```shell
+   npm install
+   ```
+4. Run test cases
+   ```shell
+   npx hardhat test
+   ```
+
