@@ -5,8 +5,13 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "hardhat/console.sol";
 
+/**
+ * @dev Permit for {ERC20} that allows token holders to use their tokens
+ * without sending any transactions by setting max {IERC20-allowance} to
+ * this Permit contract and spending them via {permit} method which uses
+ * {IERC20-transferFrom}.
+ */
 contract Permit is Ownable{
     using SafeERC20 for ERC20;
 
@@ -16,23 +21,11 @@ contract Permit is Ownable{
     // keccak256("Permit(address owner, address spender, uint256 value, uint256 nonce, uint256 deadline)")
     bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
-    // Mapping from underlying ERC20 to domainHash
-    mapping (address => bytes32) domainsAllowed;
-
-    // modifier to check if domain is allowed
-    modifier isDomainAllowed(address tokenAddress) {
-        require(domainsAllowed[tokenAddress] != bytes32(0x00), "ERR_DOMAIN_NOT_ALLOWED");
-        _;
-    }
-
-    // event for new domain allowed
-    event DomainAllowed(address erc20Address);
-
     /**
-     * @dev function to add domainHash for underlying ERC20
+     * @dev function to get domainHash for underlying ERC20
      * @param erc20Address : address of underlyin ERC20 token
      */
-    function allowDomain(address erc20Address) external onlyOwner {
+    function getDomainSeparator(address erc20Address) public view onlyOwner returns (bytes32){
         uint256 chainID;
         assembly {
             chainID := chainid()
@@ -48,8 +41,7 @@ contract Permit is Ownable{
                 address(this)
             )
         );
-        domainsAllowed[erc20Address] = domainSeparator;
-        emit DomainAllowed(erc20Address);
+        return domainSeparator;
     }
 
     /**
@@ -74,19 +66,24 @@ contract Permit is Ownable{
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public isDomainAllowed(erc20Address) {
+    ) public {
         // check if signature is expired
         require(block.timestamp <= deadline, "ERR_SIGNATURE_EXPIRED");
-        
+
+        // generate hash struct
         bytes32 hashStruct =
             keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, amount, _nonces[owner][erc20Address], deadline));
-        bytes32 _hash = keccak256(abi.encodePacked(uint16(0x1901), domainsAllowed[erc20Address], hashStruct));
+        // generate message hash
+        bytes32 _hash = keccak256(abi.encodePacked(uint16(0x1901), getDomainSeparator(erc20Address), hashStruct));
 
+        // recover signer from hash
         address signer = ecrecover(_hash, v, r, s);
         require(signer != address(0) && signer == owner, "ERR_INVALID_SIGNATURE");
 
+        // increment owner nonce
         _nonces[owner][erc20Address]++;
 
+        // transfer from owner to spender
         ERC20(erc20Address).safeTransferFrom(owner, spender, amount);
     }
     
