@@ -1,15 +1,6 @@
 
 import * as hre from "hardhat";
 
-const chainIds = {
-    1337: "ganache",
-    5: "goerli",
-    42: "kovan",
-    1: "mainnet",
-    4: "rinkeby",
-    3: "ropsten",
-  };
-
 const getNetworkName = async() => {
     const [signer] = await hre.ethers.getSigners();
     const network = await signer.provider?.getNetwork();
@@ -17,6 +8,22 @@ const getNetworkName = async() => {
     switch (network?.chainId) {
         case 42: {
             networkName = "kovan";
+            break;
+        }
+        case 1337: {
+            networkName = "ganache"
+            break
+        }
+        case 5: {
+            networkName = "goerli";
+            break;
+        }
+        case 4: {
+            networkName = "rinkeby";
+            break;
+        }
+        case 3: {
+            networkName = "ropsten";
             break;
         }
         case 1: {
@@ -27,5 +34,9 @@ const getNetworkName = async() => {
             console.log("Unsupported network");
         }
     }
-    
+    return networkName
+}
+
+export{
+    getNetworkName
 }

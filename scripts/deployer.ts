@@ -1,5 +1,6 @@
 import * as hre from "hardhat";
 import { ContractFactory, Contract } from 'ethers';
+import { getNetworkName } from "./utils"
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -20,23 +21,7 @@ async function main() {
   await sleep(60000);
 
   // get network name by chain id
-  const [signer] = await hre.ethers.getSigners();
-  const network = await signer.provider?.getNetwork();
-  let networkName;
-  switch (network?.chainId) {
-    case 42: {
-      networkName = "kovan";
-      break;
-    }
-    case 1: {
-      networkName = "mainnet";
-      break;
-    }
-    default: {
-      console.log("Unsupported network");
-    }
-  }
-
+  let networkName = await getNetworkName();
   await hre.run("verify:verify", {
     network: networkName,
     address: permit.address,
