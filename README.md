@@ -15,11 +15,11 @@ After the user gives max allowance to <code>address(this)</code> user can send a
 ```
 
 ## Requirements
-* node v0.16.+
-* npm v0.8.+
-* hardhat
+* <a href="https://nodejs.org/en/download/">node</a>
+* <a href="https://www.npmjs.com/">npm</a>
+* <a href="https://hardhat.org/getting-started">hardhat</a>
   
-  
+
 
 ## Setup project
 1. Clone the repository
