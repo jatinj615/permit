@@ -25,7 +25,7 @@ contract Permit is Ownable{
      * @dev function to get domainHash for underlying ERC20
      * @param erc20Address : address of underlyin ERC20 token
      */
-    function getDomainSeparator(address erc20Address) public view onlyOwner returns (bytes32){
+    function getDomainSeparator(address erc20Address) public view returns (bytes32){
         uint256 chainID;
         assembly {
             chainID := chainid()
