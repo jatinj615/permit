@@ -9,9 +9,9 @@ contract which serves as a wrapper to an ERC20 and allows permits.
 Created a singleton contract which implements permit and relies on max allowance.<br>
 After the user gives max allowance to <code>address(this)</code> user can send a signature with <code>permit</code> method which checks the signature and transfers the tokens using <code>safeTransferFrom</code> method from <code>SafeERC20</code>.
 
-<b>Deployed and verified <code>Permit</code> contract address on kovan</b> <a href="https://kovan.etherscan.io/address/0x94957f401867c326d814135ec0f0F1Afda67c8c7#code">link</a>
+<b>Deployed and verified <code>Permit</code> contract address on kovan</b> <a href="https://kovan.etherscan.io/address/0xbe05377f035e00B3052633c9c813a2D1F20928E7#code">link</a>
 ```shell
-0x94957f401867c326d814135ec0f0F1Afda67c8c7
+0xbe05377f035e00B3052633c9c813a2D1F20928E7
 ```
 
 ## Requirements
